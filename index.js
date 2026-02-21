@@ -51,7 +51,8 @@ app.post('/insert', auth, async (req, res) => {
       const id = typeof data._id === 'string' && /^[a-f0-9]{24}$/i.test(data._id)
         ? new ObjectId(data._id)
         : data._id;
-      const result = await collection.replaceOne({ _id: id }, data, { upsert: true });
+      const doc = { ...data, _id: id };
+      const result = await collection.replaceOne({ _id: id }, doc, { upsert: true });
       return res.json({
         success: true,
         operation: result.upsertedCount ? 'inserted' : 'updated',
