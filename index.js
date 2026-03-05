@@ -37,6 +37,7 @@ async function connect() {
 app.post('/insert', auth, async (req, res) => {
   const ts = new Date().toISOString();
   console.log(`[${ts}] POST /insert from ${req.ip || req.socket.remoteAddress}`);
+  console.log(`[${ts}] body: ${JSON.stringify(req.body)}`);
   try {
     const { table, name, data } = req.body;
     const collectionName = table || name;
