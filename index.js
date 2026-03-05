@@ -35,6 +35,8 @@ async function connect() {
 }
 
 app.post('/insert', auth, async (req, res) => {
+  const ts = new Date().toISOString();
+  console.log(`[${ts}] POST /insert from ${req.ip || req.socket.remoteAddress}`);
   try {
     const { table, name, data } = req.body;
     const collectionName = table || name;
@@ -53,20 +55,24 @@ app.post('/insert', auth, async (req, res) => {
         : data._id;
       const doc = { ...data, _id: id };
       const result = await collection.replaceOne({ _id: id }, doc, { upsert: true });
+      const op = result.upsertedCount ? 'inserted' : 'updated';
+      console.log(`[${ts}] /insert ${op} collection=${collectionName} _id=${result.upsertedId?.toString() || id.toString()}`);
       return res.json({
         success: true,
-        operation: result.upsertedCount ? 'inserted' : 'updated',
+        operation: op,
         _id: result.upsertedId?.toString() || id.toString()
       });
     }
 
     const result = await collection.insertOne(data);
+    console.log(`[${ts}] /insert inserted collection=${collectionName} _id=${result.insertedId.toString()}`);
     res.json({
       success: true,
       operation: 'inserted',
       _id: result.insertedId.toString()
     });
   } catch (err) {
+    console.log(`[${ts}] /insert error: ${err.message}`);
     res.status(500).json({ error: err.message });
   }
 });
