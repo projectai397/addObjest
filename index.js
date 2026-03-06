@@ -39,10 +39,11 @@ app.post('/insert', auth, async (req, res) => {
   console.log(`[${ts}] POST /insert from ${req.ip || req.socket.remoteAddress}`);
   console.log(`[${ts}] body: ${JSON.stringify(req.body)}`);
   try {
-    const { table, name, data } = req.body;
-    const collectionName = table || name;
+    const { appName, table, name, data } = req.body;
+    // Use appName as collection name (ignore table); fallback to name for backward compat. Always string.
+    const collectionName = appName != null ? String(appName) : (name != null ? String(name) : (table != null ? String(table) : ''));
     if (!collectionName || !data) {
-      return res.status(400).json({ error: 'Provide table/name and data' });
+      return res.status(400).json({ error: 'Provide appName (or name) and data' });
     }
     if (typeof data !== 'object' || Array.isArray(data)) {
       return res.status(400).json({ error: 'data must be a single object' });
